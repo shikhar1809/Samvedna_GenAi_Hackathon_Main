@@ -55,8 +55,7 @@ export default function SupportBotModal({ onClose }: SupportBotModalProps) {
     setInput('')
     
     // Add user message to UI immediately
-    const updatedMessages = [...messages, { role: 'user' as const, content: userMessage }]
-    setMessages(updatedMessages)
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }])
     setLoading(true)
 
     try {
@@ -95,6 +94,7 @@ export default function SupportBotModal({ onClose }: SupportBotModalProps) {
       }
 
       // Real mode - call OpenAI API via edge function
+      // Send conversation history WITHOUT the current message (edge function will add it)
       const response = await fetch(`${supabaseUrl}/functions/v1/support-bot`, {
         method: 'POST',
         headers: {
@@ -103,7 +103,7 @@ export default function SupportBotModal({ onClose }: SupportBotModalProps) {
         },
         body: JSON.stringify({
           message: userMessage,
-          conversationHistory: updatedMessages.map(m => ({ role: m.role, content: m.content })),
+          conversationHistory: messages.map(m => ({ role: m.role, content: m.content })),
         }),
       })
 

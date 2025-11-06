@@ -39,24 +39,31 @@ serve(async (req) => {
     const lowerMessage = message.toLowerCase()
     const hasCrisisKeyword = CRISIS_KEYWORDS.some(keyword => lowerMessage.includes(keyword))
 
-    // Build conversation history
+    // Build conversation history - ensure proper format for OpenAI
     const conversationMessages = (conversationHistory || [])
       .map((msg: any) => ({
         role: msg.role === 'assistant' ? 'assistant' : 'user',
-        content: msg.content || ''
+        content: String(msg.content || '').trim()
       }))
-      .filter((msg: any) => msg.content && msg.content.trim().length > 0)
+      .filter((msg: any) => msg.content && msg.content.length > 0)
       .slice(-10) // Keep last 10 messages for context
 
     // System prompt as per reference document
     const systemPrompt = "You are a compassionate and empathetic therapist chatbot. Your purpose is to engage with users in a caring, non-judgmental manner. Listen to their emotions, validate their feelings, and help them reflect on their thoughts. Your responses should never be dismissive or suggest quick fixes. Instead, you should help users feel heard and understood. Encourage users to explore their emotions while remaining neutral and supportive. Avoid giving medical advice or making diagnoses. You are a guide, not a professional therapist. Always remind users to seek professional help if they need immediate support."
 
     // Build messages array for OpenAI API
+    // Include system prompt, conversation history, and current user message
     const messages = [
       { role: 'system', content: systemPrompt },
-      ...conversationMessages,
-      { role: 'user', content: message }
+      ...conversationMessages, // Previous conversation (without current message)
+      { role: 'user', content: message } // Current user message
     ]
+
+    console.log('Sending to ChatGPT:', {
+      messageCount: messages.length,
+      conversationHistoryLength: conversationMessages.length,
+      currentMessage: message.substring(0, 50)
+    })
 
     // Call OpenAI API
     const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
