@@ -70,15 +70,33 @@ Complete guide to deploying the SAMVEDNA mental health application.
 
 ## Part 3: Deploy Edge Functions
 
-### 3.1 Install Supabase CLI (if not already installed)
+### 3.1 Install Supabase CLI
 
+**Option A: Using npx (Recommended for Windows)**
+```bash
+npx supabase --version
+```
+
+**Option B: Direct Download (Windows)**
+1. Go to https://github.com/supabase/cli/releases
+2. Download `supabase_windows_amd64.zip`
+3. Extract and add to PATH
+
+**Option C: npm global install**
 ```bash
 npm install -g supabase
 ```
 
+**If CLI installation fails, skip to "3.6 Alternative: Manual Deployment" below**
+
 ### 3.2 Link to Your Project
 
 ```bash
+# If using npx
+npx supabase login
+npx supabase link --project-ref YOUR_PROJECT_REF
+
+# If installed globally
 supabase login
 supabase link --project-ref YOUR_PROJECT_REF
 ```
@@ -88,13 +106,25 @@ supabase link --project-ref YOUR_PROJECT_REF
 ### 3.3 Set Edge Function Secrets
 
 ```bash
+# If using npx
+npx supabase secrets set OPENAI_API_KEY=sk-your-key-here
+
+# If installed globally
 supabase secrets set OPENAI_API_KEY=sk-your-key-here
 ```
 
 ### 3.4 Deploy Edge Functions
 
 ```bash
-# Deploy all functions
+# If using npx - Deploy all functions
+npx supabase functions deploy diagnose
+npx supabase functions deploy cbt-reframe
+npx supabase functions deploy match-peers
+npx supabase functions deploy vent-anonymize
+npx supabase functions deploy ai-companion
+npx supabase functions deploy generate-report
+
+# If installed globally
 supabase functions deploy diagnose
 supabase functions deploy cbt-reframe
 supabase functions deploy match-peers
@@ -109,6 +139,51 @@ In Supabase Dashboard:
 1. Go to **Edge Functions**
 2. You should see all 6 functions listed
 3. Click each one to verify deployment status
+
+### 3.6 Alternative: Manual Deployment via Dashboard
+
+**If CLI doesn't work, deploy manually:**
+
+1. Go to **Supabase Dashboard** → Your Project → **Edge Functions**
+2. Click **"Create a new function"**
+3. For each function, do the following:
+
+**Function 1: diagnose**
+- Name: `diagnose`
+- Copy code from `supabase/functions/diagnose/index.ts`
+- Paste in editor → Click **Deploy**
+
+**Function 2: cbt-reframe**
+- Name: `cbt-reframe`
+- Copy code from `supabase/functions/cbt-reframe/index.ts`
+- Paste in editor → Click **Deploy**
+
+**Function 3: match-peers**
+- Name: `match-peers`
+- Copy code from `supabase/functions/match-peers/index.ts`
+- Paste in editor → Click **Deploy**
+
+**Function 4: vent-anonymize**
+- Name: `vent-anonymize`
+- Copy code from `supabase/functions/vent-anonymize/index.ts`
+- Paste in editor → Click **Deploy**
+
+**Function 5: ai-companion**
+- Name: `ai-companion`
+- Copy code from `supabase/functions/ai-companion/index.ts`
+- Paste in editor → Click **Deploy**
+
+**Function 6: generate-report**
+- Name: `generate-report`
+- Copy code from `supabase/functions/generate-report/index.ts`
+- Paste in editor → Click **Deploy**
+
+4. **Set Secrets Manually:**
+   - Go to **Project Settings** → **Edge Functions**
+   - Click **Add new secret**
+   - Name: `OPENAI_API_KEY`
+   - Value: Your OpenAI API key (sk-...)
+   - Click **Save**
 
 ## Part 4: Deploy Frontend to Vercel
 
