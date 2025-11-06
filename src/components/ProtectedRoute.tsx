@@ -8,10 +8,11 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth()
-  const location = useLocation()
   
   // Demo mode flag - check if user is in demo mode
   const isDemoMode = sessionStorage.getItem('demoMode') === 'true'
+
+  console.log('ProtectedRoute - User:', !!user, 'Loading:', loading, 'Demo Mode:', isDemoMode)
 
   if (loading && !isDemoMode) {
     return (
@@ -26,12 +27,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   // Allow access in demo mode or if user is authenticated
   if (!user && !isDemoMode) {
+    console.log('ProtectedRoute - Redirecting to login')
     return <Navigate to="/login" replace />
-  }
-
-  // Enable demo mode if accessing from dashboard without auth
-  if (!user && !isDemoMode && location.pathname === '/dashboard') {
-    sessionStorage.setItem('demoMode', 'true')
   }
 
   return (

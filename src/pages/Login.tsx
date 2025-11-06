@@ -149,12 +149,15 @@ export default function Login() {
 
         {/* Demo Mode Button */}
         <div className="mt-6 pt-6 border-t border-border">
-          <Link
-            to="/dashboard"
+          <button
+            onClick={() => {
+              sessionStorage.setItem('demoMode', 'true')
+              window.location.href = '/dashboard'
+            }}
             className="block w-full text-center py-3 px-4 rounded-md bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg"
           >
             🚀 Skip Sign In (Demo Mode)
-          </Link>
+          </button>
           <p className="text-xs text-muted-foreground mt-2 text-center">
             Test all features without setting up authentication
           </p>
