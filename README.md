@@ -1,18 +1,40 @@
 # SAMVEDNA - AI Mental Health Companion
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![React](https://img.shields.io/badge/React-18.2-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue)
+![Supabase](https://img.shields.io/badge/Supabase-Latest-green)
+
 An AI-powered mental health support platform built with React, TypeScript, Supabase, and OpenAI.
 
-## Features
+## ✨ Features
 
-- **AI-Powered Diagnosis**: Journal analysis using OpenAI with DSM-5 criteria
-- **Peer Support**: AI-matched peer connections with real-time chat
-- **CBT Reframing Tool**: Cognitive distortion identification and reframing
-- **Anonymous Venting**: Safe space with PII removal
-- **Support Groups**: Community-based support for various mental health conditions
-- **Therapist Reports**: AI-generated comprehensive reports
-- **Gratitude Tracking**: Daily prompts and history
-- **AI Companion**: Empathetic conversational AI with crisis detection
-- **Therapy Library**: Curated resources for CBT, DBT, and mindfulness
+### 🧠 **AI-Powered Diagnosis**
+Journal analysis using OpenAI GPT-4o-mini with DSM-5 criteria for personalized mental health insights.
+
+### 🤝 **Peer Support**
+AI-matched peer connections based on personality and mental health goals.
+
+### 💭 **CBT Reframing Tool**
+Identify cognitive distortions and reframe negative thoughts using evidence-based CBT techniques.
+
+### 💬 **Anonymous Venting**
+Safe space to express yourself with automatic PII removal for privacy protection.
+
+### 👥 **Support Groups**
+Join communities focused on specific conditions (Anxiety, Depression, PTSD, etc.).
+
+### 📊 **Therapist Reports**
+Generate comprehensive reports to share with mental health professionals.
+
+### ✨ **Gratitude Practice**
+Daily gratitude prompts to improve mental well-being.
+
+### 🤖 **AI Companion**
+Empathetic conversational AI with crisis detection and supportive responses.
+
+### 📚 **Therapy Library**
+Curated videos and articles for CBT, DBT, mindfulness, and more.
 
 ## Tech Stack
 
@@ -24,42 +46,57 @@ An AI-powered mental health support platform built with React, TypeScript, Supab
 - **Routing**: React Router
 - **Animations**: Framer Motion
 
-## Setup
+## 🚀 Quick Start
 
-1. Clone the repository:
+### Local Development
+
+1. **Clone the repository:**
 ```bash
 git clone https://github.com/shikhar1809/Samvedna_GenAi_Hackathon_Main.git
 cd Samvendna_GenAI
 ```
 
-2. Install dependencies:
+2. **Install dependencies:**
 ```bash
 npm install
 ```
 
-3. Create `.env.local` file:
+3. **Create `.env.local` file:**
 ```env
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key-here
 ```
 
-4. Run the development server:
+4. **Run the development server:**
 ```bash
 npm run dev
 ```
 
-## Supabase Setup
+5. **Open your browser:**
+Visit `http://localhost:5173`
 
-1. Create a new Supabase project at [supabase.com](https://supabase.com)
-2. Run migrations from `supabase/migrations/` in the SQL Editor
-3. Deploy Edge Functions from `supabase/functions/` using Supabase CLI
-4. Add OpenAI API key to Edge Function secrets
+### Production Deployment
 
-## Deployment
+📖 **See [DEPLOYMENT.md](./DEPLOYMENT.md) for complete deployment instructions.**
 
-- Frontend: Deploy to Vercel by connecting your GitHub repository
-- Edge Functions: Deploy using Supabase CLI
-- Environment variables: Configure in Vercel dashboard
+Quick summary:
+1. Set up Supabase project and run migrations
+2. Deploy Edge Functions with OpenAI API key
+3. Deploy frontend to Vercel
+4. Configure environment variables
+
+## 🔑 Environment Variables
+
+### Frontend (Vercel)
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+### Edge Functions (Supabase Secrets)
+```bash
+OPENAI_API_KEY=sk-your-openai-key
+```
 
 ## Project Structure
 
