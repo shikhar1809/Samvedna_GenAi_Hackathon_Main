@@ -23,7 +23,7 @@ export interface Database {
         Insert: {
           id?: string
           user_id: string
-          big_five_scores: Json
+          big_five_scores?: Json
           personality_type?: string | null
           mental_health_history?: string | null
           preferences?: Json | null
@@ -47,7 +47,7 @@ export interface Database {
           user_id: string
           content: string
           mood_score: number
-          mood_tags: string[]
+          mood_tags: string[] | null
           created_at: string
         }
         Insert: {
@@ -55,7 +55,7 @@ export interface Database {
           user_id: string
           content: string
           mood_score: number
-          mood_tags?: string[]
+          mood_tags?: string[] | null
           created_at?: string
         }
         Update: {
@@ -63,7 +63,7 @@ export interface Database {
           user_id?: string
           content?: string
           mood_score?: number
-          mood_tags?: string[]
+          mood_tags?: string[] | null
           created_at?: string
         }
       }
@@ -73,19 +73,19 @@ export interface Database {
           user_id: string
           journal_id: string | null
           analysis: Json
-          dsm5_codes: string[]
+          dsm5_codes: string[] | null
           severity: number
-          suggestions: string[]
+          suggestions: string[] | null
           created_at: string
         }
         Insert: {
           id?: string
           user_id: string
           journal_id?: string | null
-          analysis: Json
-          dsm5_codes?: string[]
+          analysis?: Json
+          dsm5_codes?: string[] | null
           severity: number
-          suggestions?: string[]
+          suggestions?: string[] | null
           created_at?: string
         }
         Update: {
@@ -93,9 +93,9 @@ export interface Database {
           user_id?: string
           journal_id?: string | null
           analysis?: Json
-          dsm5_codes?: string[]
+          dsm5_codes?: string[] | null
           severity?: number
-          suggestions?: string[]
+          suggestions?: string[] | null
           created_at?: string
         }
       }
@@ -291,7 +291,7 @@ export interface Database {
           id: string
           user_id: string
           original_thought: string
-          distortions: string[]
+          distortions: string[] | null
           reframe: string
           created_at: string
         }
@@ -299,7 +299,7 @@ export interface Database {
           id?: string
           user_id: string
           original_thought: string
-          distortions?: string[]
+          distortions?: string[] | null
           reframe: string
           created_at?: string
         }
@@ -307,11 +307,20 @@ export interface Database {
           id?: string
           user_id?: string
           original_thought?: string
-          distortions?: string[]
+          distortions?: string[] | null
           reframe?: string
           created_at?: string
         }
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      [_ in never]: never
     }
   }
 }
