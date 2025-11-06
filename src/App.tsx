@@ -5,6 +5,7 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 
 // Pages
 import Landing from './pages/Landing'
+import Analysis from './pages/Analysis'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
@@ -29,6 +30,7 @@ function App() {
         <AuthProvider>
           <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/analysis" element={<Analysis />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
             <Route

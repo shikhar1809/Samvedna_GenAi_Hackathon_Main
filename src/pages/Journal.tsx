@@ -36,7 +36,8 @@ export default function Journal() {
     const textLower = text.toLowerCase()
     const hasAnxiety = textLower.includes('anxious') || textLower.includes('worried') || textLower.includes('stress')
     const hasSadness = textLower.includes('sad') || textLower.includes('depressed') || textLower.includes('down')
-    const hasPositive = textLower.includes('happy') || textLower.includes('good') || textLower.includes('great')
+    const hasPositive = textLower.includes('happy') || textLower.includes('good') || textLower.includes('great') || textLower.includes('grateful')
+    const hasStress = textLower.includes('stress') || textLower.includes('overwhelmed') || textLower.includes('pressure')
     
     let severity = mood <= 3 ? 7 : mood <= 5 ? 5 : 3
     let concerns: string[] = []
@@ -69,12 +70,58 @@ export default function Journal() {
       positive.push('Showing self-awareness and reflection')
     }
     
+    // Calculate Mental Health Score (0-100, inverse of severity)
+    const mentalHealthScore = Math.max(0, Math.min(100, 100 - (severity * 10)))
+    
+    // Calculate Stress Level (0-100, based on keywords and mood)
+    let stressLevel = mood <= 3 ? 80 : mood <= 5 ? 60 : 40
+    if (hasStress || tags.includes('Stressed') || tags.includes('Overwhelmed')) {
+      stressLevel = Math.min(100, stressLevel + 20)
+    }
+    if (hasAnxiety) {
+      stressLevel = Math.min(100, stressLevel + 15)
+    }
+    
+    // Generate Gratitude Takeaway from positive aspects
+    let gratitudeTakeaway = 'Focus on the small moments of peace and progress in your day.'
+    if (positive.length > 0) {
+      if (positive.some(p => p.includes('gratitude') || p.includes('Grateful'))) {
+        gratitudeTakeaway = 'You\'re already practicing gratitude - this is a powerful tool for mental wellness. Keep acknowledging the positive moments, no matter how small.'
+      } else if (positive.some(p => p.includes('resilience') || p.includes('self-awareness'))) {
+        gratitudeTakeaway = 'Your ability to reflect and show self-awareness is something to be grateful for. This awareness is the first step toward growth.'
+      } else {
+        gratitudeTakeaway = 'Even in difficult times, you\'re showing resilience. Be grateful for your strength and ability to keep going.'
+      }
+    }
+    
+    // Generate Micro-Ways to Tackle (small, actionable steps)
+    const microWays: string[] = []
+    if (hasAnxiety || hasStress) {
+      microWays.push('Take 3 deep breaths right now (4 seconds in, 4 seconds hold, 4 seconds out)')
+      microWays.push('Step outside for 2 minutes of fresh air')
+      microWays.push('Write down 3 things you can control in this moment')
+    }
+    if (hasSadness) {
+      microWays.push('Text or call one person you trust')
+      microWays.push('Listen to one uplifting song')
+      microWays.push('Do one small act of self-care (drink water, stretch, wash face)')
+    }
+    if (microWays.length === 0) {
+      microWays.push('Take 5 minutes to do something you enjoy')
+      microWays.push('Write down one thing you\'re grateful for today')
+      microWays.push('Move your body for 2 minutes (stretch, walk, dance)')
+    }
+    
     return {
       summary: `Based on your journal entry, you're experiencing a mood level of ${mood}/10. ${hasAnxiety ? 'There are signs of anxiety and worry.' : ''} ${hasSadness ? 'Some low mood indicators are present.' : ''} ${hasPositive ? 'You also show positive outlook and resilience.' : ''} It's important to acknowledge all your feelings.`,
       dsm5_codes: severity >= 7 ? ['F41.1 - Generalized Anxiety Disorder (Possible)', 'F32.9 - Major Depressive Disorder (Possible)'] : [],
       severity: severity,
+      mentalHealthScore: mentalHealthScore,
+      stressLevel: stressLevel,
       key_concerns: concerns,
       positive_aspects: positive,
+      gratitudeTakeaway: gratitudeTakeaway,
+      microWays: microWays,
       suggestions: [
         'Practice deep breathing exercises for 5 minutes daily',
         'Consider keeping a gratitude journal alongside your regular entries',

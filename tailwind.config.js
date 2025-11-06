@@ -51,11 +51,34 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Neobrutalism colors
+        neo: {
+          yellow: "#FFE66D",
+          pink: "#FF6B9D",
+          blue: "#4ECDC4",
+          green: "#95E1D3",
+          orange: "#FFA07A",
+          purple: "#C7CEEA",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        none: "0",
+      },
+      borderWidth: {
+        '4': '4px',
+        '6': '6px',
+        '8': '8px',
+      },
+      fontWeight: {
+        'heavy': '900',
+      },
+      boxShadow: {
+        'neo': '8px 8px 0px 0px #000',
+        'neo-sm': '4px 4px 0px 0px #000',
+        'neo-lg': '12px 12px 0px 0px #000',
       },
       keyframes: {
         "accordion-down": {

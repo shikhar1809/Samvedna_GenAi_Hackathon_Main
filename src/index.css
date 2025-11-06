@@ -55,6 +55,35 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-weight: 500;
+  }
+}
+
+/* Neobrutalism Utilities */
+@layer utilities {
+  .border-neo {
+    @apply border-4 border-black;
+  }
+  
+  .border-neo-thick {
+    @apply border-8 border-black;
+  }
+  
+  .shadow-neo {
+    box-shadow: 8px 8px 0px 0px #000;
+  }
+  
+  .shadow-neo-sm {
+    box-shadow: 4px 4px 0px 0px #000;
+  }
+  
+  .shadow-neo-lg {
+    box-shadow: 12px 12px 0px 0px #000;
+  }
+  
+  .text-neo-bold {
+    font-weight: 900;
+    letter-spacing: -0.02em;
   }
 }
 
