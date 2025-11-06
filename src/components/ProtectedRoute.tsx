@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './AuthProvider'
 
 interface ProtectedRouteProps {
@@ -8,8 +8,12 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { user, loading } = useAuth()
+  const location = useLocation()
+  
+  // Demo mode flag - check if user is in demo mode
+  const isDemoMode = sessionStorage.getItem('demoMode') === 'true'
 
-  if (loading) {
+  if (loading && !isDemoMode) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -20,10 +24,26 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     )
   }
 
-  if (!user) {
+  // Allow access in demo mode or if user is authenticated
+  if (!user && !isDemoMode) {
     return <Navigate to="/login" replace />
   }
 
-  return <>{children}</>
+  // Enable demo mode if accessing from dashboard without auth
+  if (!user && !isDemoMode && location.pathname === '/dashboard') {
+    sessionStorage.setItem('demoMode', 'true')
+  }
+
+  return (
+    <>
+      {/* Demo Mode Banner */}
+      {isDemoMode && !user && (
+        <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white py-2 px-4 text-center text-sm font-medium">
+          🚀 Demo Mode - You're testing without authentication. Data won't be saved.
+        </div>
+      )}
+      {children}
+    </>
+  )
 }
 

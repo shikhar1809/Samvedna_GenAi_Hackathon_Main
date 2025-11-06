@@ -26,6 +26,12 @@ export default function Landing() {
             >
               Sign In
             </Link>
+            <Link
+              to="/dashboard"
+              className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-8 py-3 rounded-lg font-semibold hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg"
+            >
+              🚀 Try Demo
+            </Link>
           </div>
         </div>
 
