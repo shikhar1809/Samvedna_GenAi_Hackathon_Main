@@ -4,6 +4,7 @@
 ![React](https://img.shields.io/badge/React-18.2-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue)
 ![Supabase](https://img.shields.io/badge/Supabase-Latest-green)
+![Status](https://img.shields.io/badge/status-active-success)
 
 An AI-powered mental health support platform built with React, TypeScript, Supabase, and OpenAI.
 
