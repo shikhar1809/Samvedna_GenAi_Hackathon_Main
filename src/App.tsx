@@ -1,6 +1,13 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './components/AuthProvider'
+import { ProtectedRoute } from './components/ProtectedRoute'
+
+// Pages
+import Landing from './pages/Landing'
+import Login from './pages/Login'
+import Signup from './pages/Signup'
+import Dashboard from './pages/Dashboard'
 
 const queryClient = new QueryClient()
 
@@ -10,13 +17,18 @@ function App() {
       <Router>
         <AuthProvider>
           <Routes>
-            <Route path="/" element={<div className="min-h-screen bg-background text-foreground flex items-center justify-center">
-              <div className="text-center">
-                <h1 className="text-4xl font-bold mb-4">SAMVEDNA</h1>
-                <p className="text-muted-foreground">AI Mental Health Companion</p>
-                <p className="text-sm mt-4">Setting up...</p>
-              </div>
-            </div>} />
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route
+              path="/dashboard"
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </AuthProvider>
       </Router>
