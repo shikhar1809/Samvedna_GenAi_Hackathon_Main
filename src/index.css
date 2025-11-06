@@ -85,5 +85,29 @@
     font-weight: 900;
     letter-spacing: -0.02em;
   }
+  
+  .neo-button {
+    @apply border-neo shadow-neo font-black uppercase tracking-wide transition-all;
+    border-radius: 0;
+  }
+  
+  .neo-button:hover {
+    @apply shadow-neo-lg;
+  }
+  
+  .neo-card {
+    @apply border-neo shadow-neo bg-white;
+    border-radius: 0;
+  }
+  
+  .neo-input {
+    @apply border-4 border-black bg-white;
+    border-radius: 0;
+  }
+  
+  .neo-input:focus {
+    @apply outline-none ring-0;
+    box-shadow: 4px 4px 0px 0px #000;
+  }
 }
 

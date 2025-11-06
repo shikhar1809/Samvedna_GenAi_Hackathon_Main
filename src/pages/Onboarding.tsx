@@ -33,7 +33,7 @@ export default function Onboarding() {
           personality_type: personalityType,
           mental_health_history: mentalHealthHistory,
           preferences: preferences,
-        })
+        } as any)
 
       if (profileError) throw profileError
 

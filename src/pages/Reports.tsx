@@ -65,12 +65,20 @@ export default function Reports() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-primary">Therapist Reports</h1>
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="px-4 py-2 text-sm border border-border rounded-md hover:bg-accent transition-colors"
-            >
-              Back to Dashboard
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => navigate('/profile')}
+                className="px-4 py-2 text-sm border border-border rounded-md hover:bg-accent transition-colors"
+              >
+                View Profile
+              </button>
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="px-4 py-2 text-sm border border-border rounded-md hover:bg-accent transition-colors"
+              >
+                Back to Dashboard
+              </button>
+            </div>
           </div>
         </div>
       </nav>
@@ -79,9 +87,13 @@ export default function Reports() {
         <div className="max-w-4xl mx-auto">
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-border mb-8">
             <h2 className="text-xl font-bold mb-4">Generate Comprehensive Report</h2>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground mb-4">
               Create a detailed report of your mental health journey to share with your therapist. 
-              This includes mood trends, journal analysis, diagnoses, and progress indicators.
+              This includes mood trends, journal analysis, diagnoses, CBT suggestions, progress journey, 
+              peer accountability insights, and yard visualization.
+            </p>
+            <p className="text-sm text-muted-foreground mb-6">
+              For more detailed views, visit your <button onClick={() => navigate('/profile')} className="text-primary hover:underline font-medium">Profile</button> page to see personalized dashboards, calendar view, and progress tracking.
             </p>
             <button
               onClick={handleGenerate}

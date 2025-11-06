@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useAuth } from './AuthProvider'
 import { supabase } from '../lib/supabase'
 import SlotMachineAnimation from './SlotMachineAnimation'
 import PeerMatchingQuestions, { PeerMatchingAnswers } from './PeerMatchingQuestions'
 import CompatibilityDisplay from './CompatibilityDisplay'
 import { BigFiveScores } from '../lib/bigfive'
+import { DEMO_PROFILE, getDemoProfile, setDemoMode } from '../lib/demoProfile'
 
 interface PeerMatchModalProps {
   onClose: () => void
@@ -29,6 +30,7 @@ export default function PeerMatchModal({ onClose }: PeerMatchModalProps) {
   const [hasCompletedQuestions, setHasCompletedQuestions] = useState(false)
   const [showQuestions, setShowQuestions] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [usingDemo, setUsingDemo] = useState(false)
   const { user } = useAuth()
 
   useEffect(() => {
@@ -36,8 +38,28 @@ export default function PeerMatchModal({ onClose }: PeerMatchModalProps) {
   }, [user])
 
   const checkUserProfile = async () => {
+    // Check if demo mode is enabled
+    const demoProfile = getDemoProfile()
+    if (demoProfile) {
+      setUserProfile({
+        id: 'demo',
+        user_id: demoProfile.user_id,
+        big_five_scores: demoProfile.big_five_scores,
+        personality_type: demoProfile.personality_type,
+        mental_health_history: demoProfile.mental_health_history,
+        preferences: demoProfile.preferences,
+      })
+      setHasCompletedQuiz(true)
+      setHasCompletedQuestions(!!demoProfile.preferences?.peerMatchingAnswers)
+      setUsingDemo(true)
+      setLoading(false)
+      return
+    }
+
     if (!user) {
       setLoading(false)
+      setHasCompletedQuiz(false)
+      setHasCompletedQuestions(false)
       return
     }
 
@@ -52,38 +74,71 @@ export default function PeerMatchModal({ onClose }: PeerMatchModalProps) {
         throw error
       }
 
-      if (profile) {
-        setUserProfile(profile)
-        const hasScores = profile.big_five_scores && 
-          typeof profile.big_five_scores === 'object' &&
-          'openness' in profile.big_five_scores
+      if (profile && typeof profile === 'object') {
+        const profileData = profile as any
+        const userProfileData: UserProfile = {
+          id: profileData.id as string,
+          user_id: profileData.user_id as string,
+          big_five_scores: profileData.big_five_scores as BigFiveScores,
+          personality_type: profileData.personality_type as string | null,
+          mental_health_history: profileData.mental_health_history as string | null,
+          preferences: profileData.preferences || {},
+        }
+        setUserProfile(userProfileData)
+        const hasScores = userProfileData.big_five_scores && 
+          typeof userProfileData.big_five_scores === 'object' &&
+          'openness' in userProfileData.big_five_scores
         setHasCompletedQuiz(hasScores)
 
-        const prefs = profile.preferences || {}
+        const prefs = userProfileData.preferences || {}
         const hasQuestions = prefs.peerMatchingAnswers && 
           prefs.peerMatchingAnswers.communicationStyle &&
           prefs.peerMatchingAnswers.mentalHealthGoals?.length > 0
         setHasCompletedQuestions(hasQuestions)
+      } else {
+        setHasCompletedQuiz(false)
+        setHasCompletedQuestions(false)
       }
     } catch (error) {
       console.error('Error fetching user profile:', error)
+      setHasCompletedQuiz(false)
+      setHasCompletedQuestions(false)
     } finally {
       setLoading(false)
     }
   }
 
   const handleQuestionsComplete = async (answers: PeerMatchingAnswers) => {
+    if (usingDemo) {
+      // For demo mode, just update local state
+      const demoProfile = getDemoProfile()
+      if (demoProfile && userProfile) {
+        const updatedPreferences = {
+          ...demoProfile.preferences,
+          peerMatchingAnswers: answers,
+        }
+        setUserProfile({
+          ...userProfile,
+          preferences: updatedPreferences,
+        })
+      }
+      setHasCompletedQuestions(true)
+      setShowQuestions(false)
+      return
+    }
+
     if (!user) return
 
     try {
+      const updatedPreferences: any = {
+        ...(userProfile?.preferences || {}),
+        peerMatchingAnswers: answers,
+      }
+      const updateData: any = { preferences: updatedPreferences }
       const { error } = await supabase
         .from('user_profiles')
-        .update({
-          preferences: {
-            ...(userProfile?.preferences || {}),
-            peerMatchingAnswers: answers,
-          },
-        })
+        // @ts-expect-error - Supabase type inference issue with JSONB fields
+        .update(updateData)
         .eq('user_id', user.id)
 
       if (error) throw error
@@ -95,20 +150,183 @@ export default function PeerMatchModal({ onClose }: PeerMatchModalProps) {
     }
   }
 
+  const handleEnableDemo = () => {
+    setDemoMode(true)
+    const demoProfile = getDemoProfile()
+    if (demoProfile) {
+      setUserProfile({
+        id: 'demo',
+        user_id: demoProfile.user_id,
+        big_five_scores: demoProfile.big_five_scores,
+        personality_type: demoProfile.personality_type,
+        mental_health_history: demoProfile.mental_health_history,
+        preferences: demoProfile.preferences,
+      })
+      setHasCompletedQuiz(true)
+      setHasCompletedQuestions(false)
+      setUsingDemo(true)
+    }
+  }
+
   const handleFindPeer = async () => {
-    if (!user) return
+    const userId = usingDemo ? DEMO_PROFILE.user_id : user?.id
+    if (!userId) return
 
     setShowAnimation(true)
     setMatching(true)
 
     try {
+      // For demo mode, create a mock match response with variation
+      if (usingDemo) {
+        await new Promise(resolve => setTimeout(resolve, 3000)) // Simulate animation time
+        
+        // Get all demo profiles and calculate compatibility with current user
+        const { getAllDemoProfiles } = await import('../lib/demoProfile')
+        const allDemoProfiles = getAllDemoProfiles()
+        const currentDemoProfile = getDemoProfile()
+        
+        if (!currentDemoProfile) {
+          alert('Demo profile not found')
+          setShowAnimation(false)
+          setMatching(false)
+          return
+        }
+
+        // Calculate compatibility for all demo profiles
+        const demoCompatibilities = allDemoProfiles
+          .filter(profile => profile.user_id !== currentDemoProfile.user_id) // Exclude self
+          .map(peer => {
+            const scores1 = currentDemoProfile.big_five_scores
+            const scores2 = peer.big_five_scores
+            
+            const calculateTraitCompatibility = (trait: keyof typeof scores1): number => {
+              const score1 = scores1[trait] || 50
+              const score2 = scores2[trait] || 50
+              const diff = Math.abs(score1 - score2)
+              return Math.max(0, 100 - diff)
+            }
+
+            const openness = calculateTraitCompatibility('openness')
+            const conscientiousness = calculateTraitCompatibility('conscientiousness')
+            const extraversion = calculateTraitCompatibility('extraversion')
+            const agreeableness = calculateTraitCompatibility('agreeableness')
+            const neuroticism = calculateTraitCompatibility('neuroticism')
+
+            const match_score = (
+              openness * 0.2 +
+              conscientiousness * 0.2 +
+              extraversion * 0.2 +
+              agreeableness * 0.25 +
+              neuroticism * 0.15
+            ) / 100
+
+            return {
+              peer,
+              match_score: Math.min(1, Math.max(0.5, match_score)),
+              compatibility_breakdown: {
+                openness,
+                conscientiousness,
+                extraversion,
+                agreeableness,
+                neuroticism,
+              },
+            }
+          })
+
+        // Sort by match score and select from top matches with variation
+        demoCompatibilities.sort((a, b) => b.match_score - a.match_score)
+        const topScore = demoCompatibilities[0]?.match_score || 0
+        const topMatches = demoCompatibilities.filter(
+          p => p.match_score >= topScore - 0.05 && p.match_score > 0.6
+        )
+
+        // Weighted random selection from top matches
+        let selectedMatch
+        if (topMatches.length > 1) {
+          const weights = topMatches.map(m => Math.pow(m.match_score, 3))
+          const totalWeight = weights.reduce((sum, w) => sum + w, 0)
+          let random = Math.random() * totalWeight
+          
+          for (let i = 0; i < topMatches.length; i++) {
+            random -= weights[i]
+            if (random <= 0) {
+              selectedMatch = topMatches[i]
+              break
+            }
+          }
+          if (!selectedMatch) selectedMatch = topMatches[0]
+        } else {
+          selectedMatch = demoCompatibilities[0]
+        }
+
+        const selectedPeer = selectedMatch.peer
+        const compatibility = selectedMatch.compatibility_breakdown
+
+        // Generate reasoning based on compatibility
+        const highTraits: string[] = []
+        if (compatibility.openness > 80) highTraits.push('openness to new experiences')
+        if (compatibility.conscientiousness > 80) highTraits.push('organized and goal-oriented approach')
+        if (compatibility.extraversion > 80) highTraits.push('social and outgoing nature')
+        if (compatibility.agreeableness > 80) highTraits.push('empathetic and supportive personality')
+        if (compatibility.neuroticism < 30) highTraits.push('emotional stability')
+
+        const reasoning = highTraits.length > 0
+          ? `You both share strong compatibility in ${highTraits.join(', ')}. Your similar personality traits and mental health goals make you excellent peer support partners. You can provide mutual understanding and encouragement on your journeys.`
+          : `You have complementary personality traits that work well together. Your shared mental health goals and communication preferences create a strong foundation for peer support.`
+
+        // Generate activities based on compatibility
+        const activities: string[] = []
+        if (compatibility.openness > 70) {
+          activities.push('Explore new mindfulness techniques together')
+        }
+        if (compatibility.conscientiousness > 70) {
+          activities.push('Set and track mental health goals together')
+        }
+        if (compatibility.extraversion > 70) {
+          activities.push('Participate in peer support discussions and group activities')
+        }
+        if (compatibility.agreeableness > 70) {
+          activities.push('Share daily check-ins and provide mutual support')
+        }
+        if (compatibility.neuroticism < 50) {
+          activities.push('Practice stress management and emotional regulation techniques')
+        }
+        
+        if (activities.length === 0) {
+          activities.push(
+            'Share daily check-ins and support each other',
+            'Exchange journaling prompts and reflections',
+            'Practice mindfulness exercises together',
+            'Set and track mental health goals together'
+          )
+        }
+
+        const mockMatch = {
+          success: true,
+          match: {
+            id: `demo-match-${selectedPeer.user_id}`,
+            match_score: selectedMatch.match_score,
+            compatibility_breakdown: compatibility,
+            reasoning,
+            activities: activities.slice(0, 6),
+          },
+          peer: {
+            ...selectedPeer,
+            big_five_scores: selectedPeer.big_five_scores,
+          },
+        }
+        setMatch(mockMatch)
+        setMatching(false)
+        return
+      }
+
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/match-peers`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
-        body: JSON.stringify({ userId: user.id }),
+        body: JSON.stringify({ userId }),
       })
 
       const result = await response.json()
@@ -211,7 +429,10 @@ export default function PeerMatchModal({ onClose }: PeerMatchModalProps) {
                               👤
                             </div>
                             <div>
-                              <h4 className="font-bold text-lg">{user?.email?.split('@')[0] || 'User'}</h4>
+                              <h4 className="font-bold text-lg">
+                                {usingDemo ? DEMO_PROFILE.name : (user?.email?.split('@')[0] || 'User')}
+                                {usingDemo && <span className="ml-2 text-xs bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 px-2 py-1 rounded">DEMO</span>}
+                              </h4>
                               {userProfile.personality_type && (
                                 <p className="text-sm text-muted-foreground">{userProfile.personality_type}</p>
                               )}
@@ -234,13 +455,54 @@ export default function PeerMatchModal({ onClose }: PeerMatchModalProps) {
                       </div>
                     ) : (
                       <div className="text-center py-8">
-                        <p className="text-muted-foreground mb-4">Complete your personality test to see your profile</p>
-                        <button
-                          onClick={handleClose}
-                          className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-                        >
-                          Go to Onboarding
-                        </button>
+                        <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center text-4xl mx-auto mb-4">
+                          👤
+                        </div>
+                        <p className="text-muted-foreground mb-4">Complete your personality test (OCEAN) to see your profile and unlock peer matching</p>
+                        {!user && !usingDemo ? (
+                          <div className="space-y-2">
+                            <button
+                              onClick={handleEnableDemo}
+                              className="w-full px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-md hover:from-purple-700 hover:to-pink-700 transition-colors font-semibold"
+                            >
+                              🚀 Try Demo Mode (Test Features)
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleClose()
+                                window.location.href = '/signup'
+                              }}
+                              className="w-full px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                            >
+                              Sign Up to Get Started
+                            </button>
+                            <button
+                              onClick={() => {
+                                handleClose()
+                                window.location.href = '/login'
+                              }}
+                              className="w-full px-6 py-2 border border-border rounded-md hover:bg-accent transition-colors"
+                            >
+                              Already have an account? Login
+                            </button>
+                          </div>
+                        ) : !usingDemo ? (
+                          <button
+                            onClick={() => {
+                              handleClose()
+                              window.location.href = '/onboarding'
+                            }}
+                            className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                          >
+                            Go to Onboarding
+                          </button>
+                        ) : (
+                          <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-md p-3">
+                            <p className="text-sm text-purple-800 dark:text-purple-200">
+                              🚀 Demo Mode Active - You're testing with a demo profile
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

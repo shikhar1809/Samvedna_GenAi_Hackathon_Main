@@ -45,7 +45,7 @@ export default function Gratitude() {
         .insert({
           user_id: user.id,
           content: content.trim(),
-        })
+        } as any)
 
       if (error) throw error
 

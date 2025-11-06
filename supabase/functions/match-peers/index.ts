@@ -6,29 +6,108 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// Demo user data - always available for testing
-const DEMO_USER = {
-  user_id: '00000000-0000-0000-0000-000000000000',
-  big_five_scores: {
-    openness: 75,
-    conscientiousness: 80,
-    extraversion: 70,
-    agreeableness: 85,
-    neuroticism: 30,
+// Demo users data - always available for testing
+const DEMO_USERS = [
+  {
+    user_id: 'demo-user-001',
+    big_five_scores: { openness: 75, conscientiousness: 80, extraversion: 70, agreeableness: 85, neuroticism: 30 },
+    personality_type: 'The Supportive Explorer',
+    mental_health_history: 'Experienced with anxiety management and mindfulness practices. Enjoys helping others on their mental health journey.',
+    preferences: { peerMatchingAnswers: { communicationStyle: 'mixed', preferredContactTime: 'evening', mentalHealthGoals: ['Managing Anxiety', 'Building Self-Esteem', 'Stress Management'], availability: 'few-times-week' } },
+    name: 'Alex',
+    emoji: '🌟',
   },
-  personality_type: 'The Supportive Explorer',
-  mental_health_history: 'Experienced with anxiety management and mindfulness practices. Enjoys helping others on their mental health journey.',
-  preferences: {
-    peerMatchingAnswers: {
-      communicationStyle: 'mixed',
-      preferredContactTime: 'evening',
-      mentalHealthGoals: ['Managing Anxiety', 'Building Self-Esteem', 'Stress Management'],
-      availability: 'few-times-week',
-    },
+  {
+    user_id: 'demo-user-002',
+    big_five_scores: { openness: 60, conscientiousness: 90, extraversion: 50, agreeableness: 75, neuroticism: 25 },
+    personality_type: 'The Organized Helper',
+    mental_health_history: 'Struggling with perfectionism and work-related anxiety. Seeking someone who understands the pressure of high expectations.',
+    preferences: { peerMatchingAnswers: { communicationStyle: 'text', preferredContactTime: 'morning', mentalHealthGoals: ['Stress Management', 'Building Self-Esteem'], availability: 'weekly' } },
+    name: 'Jordan',
+    emoji: '📚',
   },
-  name: 'Alex',
-  emoji: '🌟',
-}
+  {
+    user_id: 'demo-user-003',
+    big_five_scores: { openness: 85, conscientiousness: 65, extraversion: 85, agreeableness: 80, neuroticism: 40 },
+    personality_type: 'The Creative Socializer',
+    mental_health_history: 'Dealing with social anxiety despite being outgoing. Looking for someone to practice social skills and build confidence together.',
+    preferences: { peerMatchingAnswers: { communicationStyle: 'mixed', preferredContactTime: 'evening', mentalHealthGoals: ['Social Skills', 'Managing Anxiety'], availability: 'few-times-week' } },
+    name: 'Sam',
+    emoji: '🎨',
+  },
+  {
+    user_id: 'demo-user-004',
+    big_five_scores: { openness: 70, conscientiousness: 75, extraversion: 40, agreeableness: 90, neuroticism: 35 },
+    personality_type: 'The Thoughtful Listener',
+    mental_health_history: 'Experiencing depression and isolation. Wants to connect with someone who values deep conversations and mutual support.',
+    preferences: { peerMatchingAnswers: { communicationStyle: 'text', preferredContactTime: 'anytime', mentalHealthGoals: ['Coping with Depression', 'Building Self-Esteem'], availability: 'daily' } },
+    name: 'Taylor',
+    emoji: '💙',
+  },
+  {
+    user_id: 'demo-user-005',
+    big_five_scores: { openness: 90, conscientiousness: 70, extraversion: 75, agreeableness: 70, neuroticism: 50 },
+    personality_type: 'The Adventurous Optimist',
+    mental_health_history: 'Managing ADHD and impulsivity. Looking for accountability partner and someone to share creative projects with.',
+    preferences: { peerMatchingAnswers: { communicationStyle: 'voice', preferredContactTime: 'afternoon', mentalHealthGoals: ['Stress Management', 'Emotional Regulation'], availability: 'few-times-week' } },
+    name: 'Riley',
+    emoji: '🚀',
+  },
+  {
+    user_id: 'demo-user-006',
+    big_five_scores: { openness: 55, conscientiousness: 85, extraversion: 60, agreeableness: 88, neuroticism: 20 },
+    personality_type: 'The Stable Supporter',
+    mental_health_history: 'Recovering from burnout and learning to set boundaries. Wants to help others while maintaining healthy limits.',
+    preferences: { peerMatchingAnswers: { communicationStyle: 'mixed', preferredContactTime: 'morning', mentalHealthGoals: ['Stress Management', 'General Wellness'], availability: 'weekly' } },
+    name: 'Casey',
+    emoji: '🛡️',
+  },
+  {
+    user_id: 'demo-user-007',
+    big_five_scores: { openness: 80, conscientiousness: 60, extraversion: 90, agreeableness: 75, neuroticism: 45 },
+    personality_type: 'The Energetic Connector',
+    mental_health_history: 'Struggling with mood swings and maintaining relationships. Seeking someone who understands emotional intensity.',
+    preferences: { peerMatchingAnswers: { communicationStyle: 'video', preferredContactTime: 'evening', mentalHealthGoals: ['Emotional Regulation', 'Social Skills'], availability: 'daily' } },
+    name: 'Morgan',
+    emoji: '⚡',
+  },
+  {
+    user_id: 'demo-user-008',
+    big_five_scores: { openness: 65, conscientiousness: 88, extraversion: 45, agreeableness: 82, neuroticism: 28 },
+    personality_type: 'The Reliable Introvert',
+    mental_health_history: 'Coping with social anxiety and building confidence. Prefers one-on-one connections over group settings.',
+    preferences: { peerMatchingAnswers: { communicationStyle: 'text', preferredContactTime: 'anytime', mentalHealthGoals: ['Managing Anxiety', 'Social Skills'], availability: 'as-needed' } },
+    name: 'Quinn',
+    emoji: '🔒',
+  },
+  {
+    user_id: 'demo-user-009',
+    big_five_scores: { openness: 88, conscientiousness: 55, extraversion: 80, agreeableness: 70, neuroticism: 55 },
+    personality_type: 'The Free-Spirited Artist',
+    mental_health_history: 'Dealing with creative blocks and self-doubt. Looking for someone who appreciates artistic expression and vulnerability.',
+    preferences: { peerMatchingAnswers: { communicationStyle: 'mixed', preferredContactTime: 'afternoon', mentalHealthGoals: ['Building Self-Esteem', 'General Wellness'], availability: 'few-times-week' } },
+    name: 'Avery',
+    emoji: '🎭',
+  },
+  {
+    user_id: 'demo-user-010',
+    big_five_scores: { openness: 72, conscientiousness: 82, extraversion: 65, agreeableness: 88, neuroticism: 32 },
+    personality_type: 'The Balanced Companion',
+    mental_health_history: 'Working through grief and loss. Seeking someone who can provide empathy and understanding during difficult times.',
+    preferences: { peerMatchingAnswers: { communicationStyle: 'voice', preferredContactTime: 'evening', mentalHealthGoals: ['Coping with Depression', 'Recovery Support'], availability: 'weekly' } },
+    name: 'Blake',
+    emoji: '🤝',
+  },
+  {
+    user_id: 'demo-user-011',
+    big_five_scores: { openness: 68, conscientiousness: 78, extraversion: 55, agreeableness: 85, neuroticism: 38 },
+    personality_type: 'The Mindful Meditator',
+    mental_health_history: 'Practicing mindfulness to manage anxiety and stress. Interested in sharing meditation techniques and wellness practices.',
+    preferences: { peerMatchingAnswers: { communicationStyle: 'text', preferredContactTime: 'morning', mentalHealthGoals: ['Stress Management', 'General Wellness'], availability: 'daily' } },
+    name: 'Dakota',
+    emoji: '🧘',
+  },
+]
 
 // Calculate compatibility between two users
 function calculateCompatibility(user1: any, user2: any): {
@@ -166,10 +245,10 @@ serve(async (req) => {
       .neq('user_id', userId)
       .limit(20)
 
-    // Always include demo user for testing
+    // Always include demo users for testing
     const availablePeers = [
       ...(potentialPeers?.filter(peer => !connectedUserIds.has(peer.user_id)) || []),
-      DEMO_USER,
+      ...DEMO_USERS,
     ]
 
     if (availablePeers.length === 0) {
@@ -185,10 +264,35 @@ serve(async (req) => {
       compatibility: calculateCompatibility(currentUser, peer),
     }))
 
-    // Find best match (highest match score)
-    const bestMatch = peerCompatibilities.reduce((best, current) => {
-      return current.compatibility.match_score > best.compatibility.match_score ? current : best
-    })
+    // Sort by match score (highest first)
+    peerCompatibilities.sort((a, b) => b.compatibility.match_score - a.compatibility.match_score)
+
+    // Add variation: if there are multiple good matches (within 5% of top score), randomly select from top matches
+    const topScore = peerCompatibilities[0]?.compatibility.match_score || 0
+    const topMatches = peerCompatibilities.filter(
+      p => p.compatibility.match_score >= topScore - 0.05 && p.compatibility.match_score > 0.6
+    )
+
+    // Select from top matches with some randomness, but prefer higher scores
+    let bestMatch
+    if (topMatches.length > 1) {
+      // Weighted random selection - higher scores have better chance
+      const weights = topMatches.map(m => Math.pow(m.compatibility.match_score, 3))
+      const totalWeight = weights.reduce((sum, w) => sum + w, 0)
+      let random = Math.random() * totalWeight
+      
+      for (let i = 0; i < topMatches.length; i++) {
+        random -= weights[i]
+        if (random <= 0) {
+          bestMatch = topMatches[i]
+          break
+        }
+      }
+      // Fallback to first if something went wrong
+      if (!bestMatch) bestMatch = topMatches[0]
+    } else {
+      bestMatch = peerCompatibilities[0]
+    }
 
     // Use OpenAI for enhanced reasoning if available
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
@@ -242,9 +346,10 @@ Return JSON with:
       }
     }
 
-    // Create connection (skip for demo user)
-    let connection = null
-    if (bestMatch.peer.user_id !== DEMO_USER.user_id) {
+    // Create connection (skip for demo users)
+    let connection: any = null
+    const isDemoUser = DEMO_USERS.some(demo => demo.user_id === bestMatch.peer.user_id)
+    if (!isDemoUser) {
       const { data: newConnection, error } = await supabase
         .from('peer_connections')
         .insert({
@@ -264,27 +369,29 @@ Return JSON with:
     } else {
       // Create a mock connection for demo user
       connection = {
-        id: 'demo-connection',
+        id: `demo-connection-${bestMatch.peer.user_id}`,
         user1_id: userId,
-        user2_id: DEMO_USER.user_id,
+        user2_id: bestMatch.peer.user_id,
         match_score: bestMatch.compatibility.match_score,
         status: 'active',
         created_at: new Date().toISOString(),
       }
     }
 
+    const peerData: any = {
+      ...bestMatch.peer,
+      name: bestMatch.peer.name || 'Your Peer Match',
+      emoji: bestMatch.peer.emoji || '👤',
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
         match: {
-          ...connection,
+          ...(connection || {}),
           ...bestMatch.compatibility,
         },
-        peer: {
-          ...bestMatch.peer,
-          name: bestMatch.peer.name || 'Your Peer Match',
-          emoji: bestMatch.peer.emoji || '👤',
-        },
+        peer: peerData,
         reasoning: bestMatch.compatibility.reasoning,
         compatibility_breakdown: bestMatch.compatibility.compatibility_breakdown,
         activities: bestMatch.compatibility.activities,

@@ -228,7 +228,7 @@ export default function Journal() {
         content: content.trim(),
         mood_score: moodScore,
         mood_tags: selectedTags,
-      })
+      } as any)
 
       if (error) throw error
 

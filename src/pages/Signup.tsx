@@ -64,22 +64,22 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md">
+    <div className="min-h-screen bg-neo-pink flex items-center justify-center p-4">
+      <div className="neo-card p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">SAMVEDNA</h1>
-          <p className="text-muted-foreground">Start your mental wellness journey today</p>
+          <h1 className="text-4xl font-black uppercase mb-2">SAMVEDNA</h1>
+          <p className="text-lg font-bold">Start your mental wellness journey today</p>
         </div>
 
         {error && (
-          <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md mb-4">
+          <div className="border-neo shadow-neo-sm bg-neo-orange text-white px-4 py-3 mb-4 font-bold">
             {error}
           </div>
         )}
 
         <form onSubmit={handleSignup} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-2">
+            <label htmlFor="email" className="block text-sm font-black uppercase mb-2">
               Email
             </label>
             <input
@@ -88,13 +88,13 @@ export default function Signup() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+              className="neo-input w-full px-4 py-3"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-2">
+            <label htmlFor="password" className="block text-sm font-black uppercase mb-2">
               Password
             </label>
             <input
@@ -103,13 +103,13 @@ export default function Signup() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+              className="neo-input w-full px-4 py-3"
               placeholder="At least 6 characters"
             />
           </div>
 
           <div>
-            <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
+            <label htmlFor="confirmPassword" className="block text-sm font-black uppercase mb-2">
               Confirm Password
             </label>
             <input
@@ -118,7 +118,7 @@ export default function Signup() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+              className="neo-input w-full px-4 py-3"
               placeholder="Re-enter password"
             />
           </div>
@@ -126,25 +126,25 @@ export default function Signup() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            className="neo-button w-full bg-neo-yellow py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Creating account...' : 'Sign Up'}
+            {loading ? 'CREATING ACCOUNT...' : 'SIGN UP'}
           </button>
         </form>
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border"></div>
+            <div className="w-full border-t-4 border-black"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white dark:bg-gray-800 text-muted-foreground">Or continue with</span>
+            <span className="px-2 bg-white font-black uppercase">OR CONTINUE WITH</span>
           </div>
         </div>
 
         <button
           onClick={handleGoogleSignup}
           disabled={loading}
-          className="w-full border border-input py-2 rounded-md hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
+          className="neo-button w-full bg-neo-green py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -164,19 +164,19 @@ export default function Signup() {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          Google
+          GOOGLE
         </button>
 
         <div className="text-center mt-6">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm font-bold">
             Already have an account?{' '}
-            <Link to="/login" className="text-primary hover:underline font-medium">
-              Sign in
+            <Link to="/login" className="text-black underline font-black">
+              SIGN IN
             </Link>
           </p>
         </div>
 
-        <div className="mt-6 text-xs text-center text-muted-foreground">
+        <div className="mt-6 text-xs text-center font-bold">
           By signing up, you agree to our Terms of Service and Privacy Policy
         </div>
       </div>

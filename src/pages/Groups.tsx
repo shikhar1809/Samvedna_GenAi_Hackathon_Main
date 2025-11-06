@@ -27,7 +27,7 @@ export default function Groups() {
 
         if (!existingGroups || existingGroups.length === 0) {
           // Create preset groups
-          await supabase.from('groups').insert(PRESET_GROUPS)
+          await supabase.from('groups').insert(PRESET_GROUPS as any)
           const { data } = await supabase.from('groups').select('*')
           setGroups(data || [])
         } else {
@@ -41,7 +41,7 @@ export default function Groups() {
             .select('group_id')
             .eq('user_id', user.id)
 
-          setMyGroups(new Set(memberships?.map(m => m.group_id) || []))
+          setMyGroups(new Set((memberships as any[])?.map((m: any) => m.group_id) || []))
         }
       } catch (error) {
         console.error('Error fetching groups:', error)
@@ -63,7 +63,7 @@ export default function Groups() {
           group_id: groupId,
           user_id: user.id,
           role: 'member',
-        })
+        } as any)
 
       if (error) throw error
 

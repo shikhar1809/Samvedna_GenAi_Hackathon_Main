@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider } from './components/AuthProvider'
 import { ProtectedRoute } from './components/ProtectedRoute'
-import FloatingPeerMatchButton from './components/FloatingPeerMatchButton'
+import FloatingMenu from './components/FloatingMenu'
 
 // Pages
 import Landing from './pages/Landing'
@@ -21,6 +21,7 @@ import Gratitude from './pages/Gratitude'
 import Library from './pages/Library'
 import PeerMatch from './pages/PeerMatch'
 import Reports from './pages/Reports'
+import Profile from './pages/Profile'
 
 const queryClient = new QueryClient()
 
@@ -130,8 +131,17 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          <FloatingMenu />
         </AuthProvider>
       </Router>
     </QueryClientProvider>

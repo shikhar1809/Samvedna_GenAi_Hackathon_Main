@@ -51,7 +51,7 @@ export default function Diagnosis() {
         return
       }
 
-      const latestJournal = journals[0]
+      const latestJournal = journals[0] as { id: string; content: string; mood_score: number; mood_tags: string[] | null }
 
       // Call diagnosis Edge Function
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/diagnose`, {

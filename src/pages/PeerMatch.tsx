@@ -50,15 +50,16 @@ export default function PeerMatch() {
       }
 
       if (profile) {
-        setUserProfile(profile)
+        const typedProfile = profile as { big_five_scores: any; preferences: any }
+        setUserProfile(typedProfile as any)
         // Check if user has completed personality test (has big_five_scores)
-        const hasScores = profile.big_five_scores && 
-          typeof profile.big_five_scores === 'object' &&
-          'openness' in profile.big_five_scores
+        const hasScores = typedProfile.big_five_scores && 
+          typeof typedProfile.big_five_scores === 'object' &&
+          'openness' in typedProfile.big_five_scores
         setHasCompletedQuiz(hasScores)
 
         // Check if user has completed peer matching questions
-        const prefs = profile.preferences || {}
+        const prefs = typedProfile.preferences || {}
         const hasQuestions = prefs.peerMatchingAnswers && 
           prefs.peerMatchingAnswers.communicationStyle &&
           prefs.peerMatchingAnswers.mentalHealthGoals?.length > 0
@@ -75,14 +76,15 @@ export default function PeerMatch() {
     if (!user) return
 
     try {
-      const { error } = await supabase
-        .from('user_profiles')
-        .update({
-          preferences: {
-            ...(userProfile?.preferences || {}),
-            peerMatchingAnswers: answers,
-          },
-        })
+      const updateData = {
+        preferences: {
+          ...(userProfile?.preferences || {}),
+          peerMatchingAnswers: answers,
+        },
+      }
+      const { error } = await (supabase
+        .from('user_profiles') as any)
+        .update(updateData)
         .eq('user_id', user.id)
 
       if (error) throw error

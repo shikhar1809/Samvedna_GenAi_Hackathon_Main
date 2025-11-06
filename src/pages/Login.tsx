@@ -50,22 +50,22 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8 w-full max-w-md">
+    <div className="min-h-screen bg-neo-blue flex items-center justify-center p-4">
+      <div className="neo-card p-8 w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-primary mb-2">SAMVEDNA</h1>
-          <p className="text-muted-foreground">Welcome back to your mental health journey</p>
+          <h1 className="text-4xl font-black uppercase mb-2">SAMVEDNA</h1>
+          <p className="text-lg font-bold">Welcome back to your mental health journey</p>
         </div>
 
         {error && (
-          <div className="bg-destructive/10 text-destructive px-4 py-3 rounded-md mb-4">
+          <div className="border-neo shadow-neo-sm bg-neo-pink text-white px-4 py-3 mb-4 font-bold">
             {error}
           </div>
         )}
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-2">
+            <label htmlFor="email" className="block text-sm font-black uppercase mb-2">
               Email
             </label>
             <input
@@ -74,13 +74,13 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+              className="neo-input w-full px-4 py-3"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-2">
+            <label htmlFor="password" className="block text-sm font-black uppercase mb-2">
               Password
             </label>
             <input
@@ -89,7 +89,7 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full px-4 py-2 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-primary bg-background"
+              className="neo-input w-full px-4 py-3"
               placeholder="••••••••"
             />
           </div>
@@ -97,25 +97,25 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-primary-foreground py-2 rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+            className="neo-button w-full bg-neo-yellow py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'SIGNING IN...' : 'SIGN IN'}
           </button>
         </form>
 
         <div className="relative my-6">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border"></div>
+            <div className="w-full border-t-4 border-black"></div>
           </div>
           <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white dark:bg-gray-800 text-muted-foreground">Or continue with</span>
+            <span className="px-2 bg-white font-black uppercase">OR CONTINUE WITH</span>
           </div>
         </div>
 
         <button
           onClick={handleGoogleLogin}
           disabled={loading}
-          className="w-full border border-input py-2 rounded-md hover:bg-accent transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium flex items-center justify-center gap-2"
+          className="neo-button w-full bg-neo-green py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -135,30 +135,30 @@ export default function Login() {
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          Google
+          GOOGLE
         </button>
 
         <div className="text-center mt-6">
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm font-bold">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-primary hover:underline font-medium">
-              Sign up
+            <Link to="/signup" className="text-black underline font-black">
+              SIGN UP
             </Link>
           </p>
         </div>
 
         {/* Demo Mode Button */}
-        <div className="mt-6 pt-6 border-t border-border">
+        <div className="mt-6 pt-6 border-t-4 border-black">
           <button
             onClick={() => {
               sessionStorage.setItem('demoMode', 'true')
               window.location.href = '/dashboard'
             }}
-            className="block w-full text-center py-3 px-4 rounded-md bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg"
+            className="neo-button w-full bg-neo-pink text-white py-4 text-lg"
           >
-            🚀 Skip Sign In (Demo Mode)
+            🚀 SKIP SIGN IN (DEMO MODE)
           </button>
-          <p className="text-xs text-muted-foreground mt-2 text-center">
+          <p className="text-xs font-bold mt-2 text-center">
             Test all features without setting up authentication
           </p>
         </div>
