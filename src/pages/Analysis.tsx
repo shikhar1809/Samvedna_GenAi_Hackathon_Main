@@ -425,10 +425,15 @@ export default function Analysis() {
             <div className="space-y-4">
               {matchedResources.length > 0 ? (
                 <>
-                  <p className="text-sm font-bold mb-3">Resources matched to your concerns:</p>
+                  <p className="text-sm font-bold mb-3">Resources that might help:</p>
                   {matchedResources.map((resource) => (
-                    <div key={resource.id} className="border-2 border-black p-3 bg-white">
-                      <h5 className="font-black uppercase text-sm mb-1">{resource.title}</h5>
+                    <div key={resource.id} className="border-2 border-black p-3 bg-white mb-3">
+                      <div className="flex items-start justify-between mb-2">
+                        <h5 className="font-black uppercase text-sm flex-1">{resource.title}</h5>
+                        <span className="border border-black px-2 py-1 bg-neo-purple text-xs font-black ml-2">
+                          {resource.type}
+                        </span>
+                      </div>
                       <p className="text-xs font-bold mb-2">{resource.description}</p>
                       <a
                         href={resource.url}
@@ -442,13 +447,13 @@ export default function Analysis() {
                   ))}
                 </>
               ) : (
-                <p className="text-sm font-bold">No specific resources matched. Check general resources below.</p>
+                <p className="text-sm font-bold">Loading resources...</p>
               )}
             </div>
           </NeobrutalismCard>
 
-          {/* Relevant Quotes */}
-          <NeobrutalismCard title="Relevant Quotes" color="yellow" defaultExpanded={false}>
+          {/* Quotes That Might Help */}
+          <NeobrutalismCard title="Quotes That Might Help" color="yellow" defaultExpanded={false}>
             <div className="space-y-4">
               {relevantQuotes.length > 0 ? (
                 relevantQuotes.map((quote) => (
@@ -458,7 +463,7 @@ export default function Analysis() {
                   </div>
                 ))
               ) : (
-                <p className="text-sm font-bold">No specific quotes matched.</p>
+                <p className="text-sm font-bold">Loading quotes...</p>
               )}
             </div>
           </NeobrutalismCard>

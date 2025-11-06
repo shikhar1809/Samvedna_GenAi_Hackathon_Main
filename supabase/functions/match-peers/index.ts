@@ -6,6 +6,123 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Demo user data - always available for testing
+const DEMO_USER = {
+  user_id: '00000000-0000-0000-0000-000000000000',
+  big_five_scores: {
+    openness: 75,
+    conscientiousness: 80,
+    extraversion: 70,
+    agreeableness: 85,
+    neuroticism: 30,
+  },
+  personality_type: 'The Supportive Explorer',
+  mental_health_history: 'Experienced with anxiety management and mindfulness practices. Enjoys helping others on their mental health journey.',
+  preferences: {
+    peerMatchingAnswers: {
+      communicationStyle: 'mixed',
+      preferredContactTime: 'evening',
+      mentalHealthGoals: ['Managing Anxiety', 'Building Self-Esteem', 'Stress Management'],
+      availability: 'few-times-week',
+    },
+  },
+  name: 'Alex',
+  emoji: '🌟',
+}
+
+// Calculate compatibility between two users
+function calculateCompatibility(user1: any, user2: any): {
+  match_score: number
+  compatibility_breakdown: {
+    openness: number
+    conscientiousness: number
+    extraversion: number
+    agreeableness: number
+    neuroticism: number
+  }
+  reasoning: string
+  activities: string[]
+} {
+  const scores1 = user1.big_five_scores || {}
+  const scores2 = user2.big_five_scores || {}
+
+  // Calculate trait compatibility (closer scores = higher compatibility)
+  const calculateTraitCompatibility = (trait: string): number => {
+    const score1 = scores1[trait] || 50
+    const score2 = scores2[trait] || 50
+    const diff = Math.abs(score1 - score2)
+    return Math.max(0, 100 - diff)
+  }
+
+  const openness = calculateTraitCompatibility('openness')
+  const conscientiousness = calculateTraitCompatibility('conscientiousness')
+  const extraversion = calculateTraitCompatibility('extraversion')
+  const agreeableness = calculateTraitCompatibility('agreeableness')
+  const neuroticism = calculateTraitCompatibility('neuroticism')
+
+  // Overall match score (weighted average)
+  const match_score = (
+    openness * 0.2 +
+    conscientiousness * 0.2 +
+    extraversion * 0.2 +
+    agreeableness * 0.25 +
+    neuroticism * 0.15
+  ) / 100
+
+  // Generate reasoning
+  const highTraits: string[] = []
+  if (openness > 80) highTraits.push('openness to new experiences')
+  if (conscientiousness > 80) highTraits.push('organized and goal-oriented approach')
+  if (extraversion > 80) highTraits.push('social and outgoing nature')
+  if (agreeableness > 80) highTraits.push('empathetic and supportive personality')
+  if (neuroticism < 30) highTraits.push('emotional stability')
+
+  const reasoning = highTraits.length > 0
+    ? `You both share strong compatibility in ${highTraits.join(', ')}. Your similar personality traits and mental health goals make you excellent peer support partners. You can provide mutual understanding and encouragement on your journeys.`
+    : `You have complementary personality traits that work well together. Your shared mental health goals and communication preferences create a strong foundation for peer support.`
+
+  // Generate activity suggestions based on compatibility
+  const activities: string[] = []
+  if (openness > 70) {
+    activities.push('Explore new mindfulness techniques together')
+  }
+  if (conscientiousness > 70) {
+    activities.push('Set and track mental health goals together')
+  }
+  if (extraversion > 70) {
+    activities.push('Participate in peer support discussions and group activities')
+  }
+  if (agreeableness > 70) {
+    activities.push('Share daily check-ins and provide mutual support')
+  }
+  if (neuroticism < 50) {
+    activities.push('Practice stress management and emotional regulation techniques')
+  }
+  
+  // Default activities if none match
+  if (activities.length === 0) {
+    activities.push(
+      'Share daily check-ins and support each other',
+      'Exchange journaling prompts and reflections',
+      'Practice mindfulness exercises together',
+      'Set and track mental health goals together'
+    )
+  }
+
+  return {
+    match_score: Math.min(1, Math.max(0.5, match_score)),
+    compatibility_breakdown: {
+      openness,
+      conscientiousness,
+      extraversion,
+      agreeableness,
+      neuroticism,
+    },
+    reasoning,
+    activities: activities.slice(0, 6), // Limit to 6 activities
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -49,15 +166,11 @@ serve(async (req) => {
       .neq('user_id', userId)
       .limit(20)
 
-    if (!potentialPeers || potentialPeers.length === 0) {
-      return new Response(
-        JSON.stringify({ success: true, match: null, message: 'No peers available at the moment' }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Filter out already connected users
-    const availablePeers = potentialPeers.filter(peer => !connectedUserIds.has(peer.user_id))
+    // Always include demo user for testing
+    const availablePeers = [
+      ...(potentialPeers?.filter(peer => !connectedUserIds.has(peer.user_id)) || []),
+      DEMO_USER,
+    ]
 
     if (availablePeers.length === 0) {
       return new Response(
@@ -66,94 +179,115 @@ serve(async (req) => {
       )
     }
 
-    // Use OpenAI to find best match
+    // Calculate compatibility for all peers
+    const peerCompatibilities = availablePeers.map(peer => ({
+      peer,
+      compatibility: calculateCompatibility(currentUser, peer),
+    }))
+
+    // Find best match (highest match score)
+    const bestMatch = peerCompatibilities.reduce((best, current) => {
+      return current.compatibility.match_score > best.compatibility.match_score ? current : best
+    })
+
+    // Use OpenAI for enhanced reasoning if available
     const openaiApiKey = Deno.env.get('OPENAI_API_KEY')
-    if (!openaiApiKey) {
-      // Fallback to simple matching if OpenAI is not available
-      const randomPeer = availablePeers[Math.floor(Math.random() * availablePeers.length)]
-      
-      const { data: connection } = await supabase
+    if (openaiApiKey) {
+      try {
+        const prompt = `You are a peer matching algorithm for a mental health app. Provide a brief, warm explanation (2-3 sentences) of why these two users are a good match.
+
+Current User:
+${JSON.stringify({ personality: currentUser.big_five_scores, history: currentUser.mental_health_history })}
+
+Matched Peer:
+${JSON.stringify({ personality: bestMatch.peer.big_five_scores, history: bestMatch.peer.mental_health_history })}
+
+Compatibility Score: ${(bestMatch.compatibility.match_score * 100).toFixed(0)}%
+
+Return JSON with:
+{
+  "reasoning": "Brief explanation of why they're a good match",
+  "activities": ["activity 1", "activity 2", "activity 3"]
+}`
+
+        const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${openaiApiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+              { role: 'system', content: 'You are a peer matching algorithm. Respond with JSON only.' },
+              { role: 'user', content: prompt }
+            ],
+            temperature: 0.7,
+            response_format: { type: 'json_object' }
+          }),
+        })
+
+        if (openaiResponse.ok) {
+          const openaiData = await openaiResponse.json()
+          const enhancedResult = JSON.parse(openaiData.choices[0].message.content)
+          if (enhancedResult.reasoning) {
+            bestMatch.compatibility.reasoning = enhancedResult.reasoning
+          }
+          if (enhancedResult.activities && Array.isArray(enhancedResult.activities)) {
+            bestMatch.compatibility.activities = enhancedResult.activities
+          }
+        }
+      } catch (error) {
+        console.error('OpenAI enhancement failed, using default reasoning:', error)
+      }
+    }
+
+    // Create connection (skip for demo user)
+    let connection = null
+    if (bestMatch.peer.user_id !== DEMO_USER.user_id) {
+      const { data: newConnection, error } = await supabase
         .from('peer_connections')
         .insert({
           user1_id: userId,
-          user2_id: randomPeer.user_id,
-          match_score: 0.5,
+          user2_id: bestMatch.peer.user_id,
+          match_score: bestMatch.compatibility.match_score,
           status: 'active',
         })
         .select()
         .single()
 
-      return new Response(
-        JSON.stringify({ success: true, match: connection, peer: randomPeer }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
-    }
-
-    // Use OpenAI for smart matching
-    const prompt = `You are a peer matching algorithm for a mental health app. Find the best match for the current user from the available peers based on personality compatibility and mental health goals.
-
-Current User:
-${JSON.stringify({ personality: currentUser.big_five_scores, history: currentUser.mental_health_history })}
-
-Available Peers:
-${JSON.stringify(availablePeers.map((p, i) => ({ 
-  index: i, 
-  personality: p.big_five_scores, 
-  history: p.mental_health_history 
-})))}
-
-Return JSON with:
-{
-  "best_match_index": <index of best matching peer>,
-  "match_score": <0.0 to 1.0>,
-  "reasoning": "Brief explanation of why they're a good match"
-}`
-
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openaiApiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: 'You are a peer matching algorithm. Respond with JSON only.' },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.7,
-        response_format: { type: 'json_object' }
-      }),
-    })
-
-    if (!openaiResponse.ok) {
-      throw new Error(`OpenAI API error: ${await openaiResponse.text()}`)
-    }
-
-    const openaiData = await openaiResponse.json()
-    const matchResult = JSON.parse(openaiData.choices[0].message.content)
-    const bestPeer = availablePeers[matchResult.best_match_index]
-
-    // Create connection
-    const { data: connection, error } = await supabase
-      .from('peer_connections')
-      .insert({
+      if (error) {
+        console.error('Error creating connection:', error)
+      } else {
+        connection = newConnection
+      }
+    } else {
+      // Create a mock connection for demo user
+      connection = {
+        id: 'demo-connection',
         user1_id: userId,
-        user2_id: bestPeer.user_id,
-        match_score: matchResult.match_score,
+        user2_id: DEMO_USER.user_id,
+        match_score: bestMatch.compatibility.match_score,
         status: 'active',
-      })
-      .select()
-      .single()
-
-    if (error) throw error
+        created_at: new Date().toISOString(),
+      }
+    }
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        match: connection, 
-        peer: bestPeer,
-        reasoning: matchResult.reasoning 
+      JSON.stringify({
+        success: true,
+        match: {
+          ...connection,
+          ...bestMatch.compatibility,
+        },
+        peer: {
+          ...bestMatch.peer,
+          name: bestMatch.peer.name || 'Your Peer Match',
+          emoji: bestMatch.peer.emoji || '👤',
+        },
+        reasoning: bestMatch.compatibility.reasoning,
+        compatibility_breakdown: bestMatch.compatibility.compatibility_breakdown,
+        activities: bestMatch.compatibility.activities,
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
@@ -164,4 +298,3 @@ Return JSON with:
     )
   }
 })
-

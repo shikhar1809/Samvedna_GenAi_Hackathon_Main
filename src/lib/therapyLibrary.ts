@@ -267,39 +267,94 @@ export const redditStories: RedditStory[] = [
 export function matchResources(concerns: string[], keywords: string[]): TherapyResource[] {
   const allKeywords = [...concerns, ...keywords].map(k => k.toLowerCase())
   
-  return therapyResources
+  // Try to match resources
+  const matched = therapyResources
     .filter(resource => 
       resource.keywords.some(keyword => 
         allKeywords.some(k => k.includes(keyword.toLowerCase()) || keyword.toLowerCase().includes(k))
       )
     )
-    .slice(0, 5) // Return top 5 matches
+    .slice(0, 5)
+  
+  // If no matches, return general helpful resources
+  if (matched.length === 0) {
+    return therapyResources.slice(0, 5)
+  }
+  
+  // If we have some matches but less than 5, add general resources
+  if (matched.length < 5) {
+    const generalResources = therapyResources
+      .filter(r => !matched.some(m => m.id === r.id))
+      .slice(0, 5 - matched.length)
+    return [...matched, ...generalResources]
+  }
+  
+  return matched
 }
 
 export function getRelevantQuotes(concerns: string[]): Quote[] {
   const concernLower = concerns.join(' ').toLowerCase()
   
-  return quotes
+  // Try to match quotes
+  const matched = quotes
     .filter(quote => {
       const quoteText = quote.text.toLowerCase()
       const quoteCategory = quote.category.toLowerCase()
       return concernLower.includes(quoteCategory) || 
              quoteText.includes('anxiety') && concernLower.includes('anxiety') ||
              quoteText.includes('depression') && concernLower.includes('depression') ||
-             quoteText.includes('stress') && concernLower.includes('stress')
+             quoteText.includes('stress') && concernLower.includes('stress') ||
+             quoteText.includes('sad') && concernLower.includes('sad') ||
+             quoteText.includes('worried') && concernLower.includes('worried')
     })
-    .slice(0, 3) // Return top 3 matches
+    .slice(0, 3)
+  
+  // If no matches, return general helpful quotes
+  if (matched.length === 0) {
+    // Return a mix of general helpful quotes
+    return [
+      quotes.find(q => q.id === 1) || quotes[0],
+      quotes.find(q => q.id === 2) || quotes[1],
+      quotes.find(q => q.id === 5) || quotes[2],
+    ].filter(Boolean) as Quote[]
+  }
+  
+  // If we have some matches but less than 3, add general quotes
+  if (matched.length < 3) {
+    const generalQuotes = quotes
+      .filter(q => !matched.some(m => m.id === q.id))
+      .slice(0, 3 - matched.length)
+    return [...matched, ...generalQuotes]
+  }
+  
+  return matched
 }
 
 export function getRelevantStories(concerns: string[], keywords: string[]): RedditStory[] {
   const allKeywords = [...concerns, ...keywords].map(k => k.toLowerCase())
   
-  return redditStories
+  // Try to match stories
+  const matched = redditStories
     .filter(story => 
       story.keywords.some(keyword => 
         allKeywords.some(k => k.includes(keyword.toLowerCase()) || keyword.toLowerCase().includes(k))
       )
     )
-    .slice(0, 3) // Return top 3 matches
+    .slice(0, 3)
+  
+  // If no matches, return general helpful stories
+  if (matched.length === 0) {
+    return redditStories.slice(0, 3)
+  }
+  
+  // If we have some matches but less than 3, add general stories
+  if (matched.length < 3) {
+    const generalStories = redditStories
+      .filter(s => !matched.some(m => m.id === s.id))
+      .slice(0, 3 - matched.length)
+    return [...matched, ...generalStories]
+  }
+  
+  return matched
 }
 
