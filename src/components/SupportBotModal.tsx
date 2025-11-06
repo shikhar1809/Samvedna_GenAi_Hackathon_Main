@@ -54,6 +54,9 @@ export default function SupportBotModal({ onClose }: SupportBotModalProps) {
     const userMessage = input.trim()
     setInput('')
     
+    // Capture current messages BEFORE updating state (React state is async)
+    const currentMessages = [...messages]
+    
     // Add user message to UI immediately
     setMessages(prev => [...prev, { role: 'user', content: userMessage }])
     setLoading(true)
@@ -95,6 +98,8 @@ export default function SupportBotModal({ onClose }: SupportBotModalProps) {
 
       // Real mode - call OpenAI API via edge function
       // Send conversation history WITHOUT the current message (edge function will add it)
+      console.log('Sending request with conversation history:', currentMessages.length, 'messages')
+      
       const response = await fetch(`${supabaseUrl}/functions/v1/support-bot`, {
         method: 'POST',
         headers: {
@@ -103,7 +108,7 @@ export default function SupportBotModal({ onClose }: SupportBotModalProps) {
         },
         body: JSON.stringify({
           message: userMessage,
-          conversationHistory: messages.map(m => ({ role: m.role, content: m.content })),
+          conversationHistory: currentMessages.map(m => ({ role: m.role, content: m.content })),
         }),
       })
 
@@ -114,8 +119,19 @@ export default function SupportBotModal({ onClose }: SupportBotModalProps) {
 
       const result = await response.json()
       
+      console.log('Received response from API:', result.success, result.response?.substring(0, 50))
+      
       if (result.success && result.response) {
-        setMessages(prev => [...prev, { role: 'assistant', content: result.response }])
+        setMessages(prev => {
+          // Ensure we don't duplicate messages
+          const lastMessage = prev[prev.length - 1]
+          if (lastMessage && lastMessage.role === 'user' && lastMessage.content === userMessage) {
+            // User message is already there, just add assistant response
+            return [...prev, { role: 'assistant', content: result.response }]
+          }
+          // If user message is missing, add both
+          return [...prev, { role: 'assistant', content: result.response }]
+        })
       } else {
         throw new Error(result.error || 'Unknown error from support bot')
       }

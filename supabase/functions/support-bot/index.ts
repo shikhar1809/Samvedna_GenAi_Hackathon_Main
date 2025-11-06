@@ -46,7 +46,7 @@ serve(async (req) => {
         content: String(msg.content || '').trim()
       }))
       .filter((msg: any) => msg.content && msg.content.length > 0)
-      .slice(-10) // Keep last 10 messages for context
+      .slice(-20) // Keep last 20 messages for better context (10 exchanges)
 
     // System prompt as per reference document
     const systemPrompt = "You are a compassionate and empathetic therapist chatbot. Your purpose is to engage with users in a caring, non-judgmental manner. Listen to their emotions, validate their feelings, and help them reflect on their thoughts. Your responses should never be dismissive or suggest quick fixes. Instead, you should help users feel heard and understood. Encourage users to explore their emotions while remaining neutral and supportive. Avoid giving medical advice or making diagnoses. You are a guide, not a professional therapist. Always remind users to seek professional help if they need immediate support."
@@ -62,7 +62,8 @@ serve(async (req) => {
     console.log('Sending to ChatGPT:', {
       messageCount: messages.length,
       conversationHistoryLength: conversationMessages.length,
-      currentMessage: message.substring(0, 50)
+      currentMessage: message.substring(0, 50),
+      conversationHistory: conversationMessages.map(m => ({ role: m.role, content: m.content.substring(0, 30) }))
     })
 
     // Call OpenAI API
