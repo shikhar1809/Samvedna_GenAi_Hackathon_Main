@@ -293,6 +293,12 @@ export function matchResources(concerns: string[], keywords: string[]): TherapyR
 }
 
 export function getRelevantQuotes(concerns: string[]): Quote[] {
+  // Always ensure we have at least 3 quotes to return
+  if (!concerns || concerns.length === 0) {
+    // Return general helpful quotes when no concerns
+    return quotes.slice(0, 3)
+  }
+  
   const concernLower = concerns.join(' ').toLowerCase()
   
   // Try to match quotes
@@ -301,22 +307,18 @@ export function getRelevantQuotes(concerns: string[]): Quote[] {
       const quoteText = quote.text.toLowerCase()
       const quoteCategory = quote.category.toLowerCase()
       return concernLower.includes(quoteCategory) || 
-             quoteText.includes('anxiety') && concernLower.includes('anxiety') ||
-             quoteText.includes('depression') && concernLower.includes('depression') ||
-             quoteText.includes('stress') && concernLower.includes('stress') ||
-             quoteText.includes('sad') && concernLower.includes('sad') ||
-             quoteText.includes('worried') && concernLower.includes('worried')
+             (quoteText.includes('anxiety') && concernLower.includes('anxiety')) ||
+             (quoteText.includes('depression') && concernLower.includes('depression')) ||
+             (quoteText.includes('stress') && concernLower.includes('stress')) ||
+             (quoteText.includes('sad') && concernLower.includes('sad')) ||
+             (quoteText.includes('worried') && concernLower.includes('worried'))
     })
     .slice(0, 3)
   
   // If no matches, return general helpful quotes
   if (matched.length === 0) {
     // Return a mix of general helpful quotes
-    return [
-      quotes.find(q => q.id === 1) || quotes[0],
-      quotes.find(q => q.id === 2) || quotes[1],
-      quotes.find(q => q.id === 5) || quotes[2],
-    ].filter(Boolean) as Quote[]
+    return quotes.slice(0, 3)
   }
   
   // If we have some matches but less than 3, add general quotes

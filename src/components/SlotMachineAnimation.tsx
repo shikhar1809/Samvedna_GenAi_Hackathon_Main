@@ -8,7 +8,7 @@ interface SlotMachineAnimationProps {
 
 export default function SlotMachineAnimation({ onComplete, matchData }: SlotMachineAnimationProps) {
   const [stage, setStage] = useState<'spinning' | 'revealing' | 'complete'>('spinning')
-  const [confetti, setConfetti] = useState<Array<{ id: number; x: number; y: number; delay: number }>>([])
+  const [confetti, setConfetti] = useState<Array<{ id: number; x: number; y: number; delay: number; xOffset: number }>>([])
 
   useEffect(() => {
     // Generate confetti particles
@@ -17,6 +17,7 @@ export default function SlotMachineAnimation({ onComplete, matchData }: SlotMach
       x: Math.random() * 100,
       y: -10,
       delay: Math.random() * 0.5,
+      xOffset: (Math.random() - 0.5) * 100,
     }))
     setConfetti(particles)
 
@@ -64,7 +65,7 @@ export default function SlotMachineAnimation({ onComplete, matchData }: SlotMach
               y: typeof window !== 'undefined' ? window.innerHeight + 100 : 1000,
               opacity: [0, 1, 1, 0],
               rotate: 360,
-              x: particle.x + (Math.random() - 0.5) * 100,
+              x: particle.x + particle.xOffset,
             }}
             transition={{
               duration: 2 + Math.random(),

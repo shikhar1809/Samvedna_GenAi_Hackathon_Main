@@ -453,17 +453,30 @@ export default function Analysis() {
           </NeobrutalismCard>
 
           {/* Quotes That Might Help */}
-          <NeobrutalismCard title="Quotes That Might Help" color="yellow" defaultExpanded={false}>
+          <NeobrutalismCard title="Quotes That Might Help" color="yellow" defaultExpanded={true}>
             <div className="space-y-4">
-              {relevantQuotes.length > 0 ? (
+              {relevantQuotes && relevantQuotes.length > 0 ? (
                 relevantQuotes.map((quote) => (
-                  <div key={quote.id} className="border-2 border-black p-4 bg-white">
+                  <div key={quote.id} className="border-2 border-black p-4 bg-white mb-3">
                     <p className="text-sm font-bold italic mb-2">"{quote.text}"</p>
                     <p className="text-xs font-black">— {quote.author}</p>
                   </div>
                 ))
               ) : (
-                <p className="text-sm font-bold">Loading quotes...</p>
+                <div className="space-y-4">
+                  <div className="border-2 border-black p-4 bg-white">
+                    <p className="text-sm font-bold italic mb-2">"You don't have to control your thoughts. You just have to stop letting them control you."</p>
+                    <p className="text-xs font-black">— Dan Millman</p>
+                  </div>
+                  <div className="border-2 border-black p-4 bg-white">
+                    <p className="text-sm font-bold italic mb-2">"The only way out is through."</p>
+                    <p className="text-xs font-black">— Robert Frost</p>
+                  </div>
+                  <div className="border-2 border-black p-4 bg-white">
+                    <p className="text-sm font-bold italic mb-2">"It's okay to not be okay. It's okay to ask for help."</p>
+                    <p className="text-xs font-black">— Unknown</p>
+                  </div>
+                </div>
               )}
             </div>
           </NeobrutalismCard>
