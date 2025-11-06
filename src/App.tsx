@@ -10,6 +10,15 @@ import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import Onboarding from './pages/Onboarding'
 import Journal from './pages/Journal'
+import Diagnosis from './pages/Diagnosis'
+import CBTReframe from './pages/CBTReframe'
+import Companion from './pages/Companion'
+import Vent from './pages/Vent'
+import Groups from './pages/Groups'
+import Gratitude from './pages/Gratitude'
+import Library from './pages/Library'
+import PeerMatch from './pages/PeerMatch'
+import Reports from './pages/Reports'
 
 const queryClient = new QueryClient()
 
@@ -43,6 +52,78 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Journal />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/diagnosis"
+              element={
+                <ProtectedRoute>
+                  <Diagnosis />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cbt-reframe"
+              element={
+                <ProtectedRoute>
+                  <CBTReframe />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/companion"
+              element={
+                <ProtectedRoute>
+                  <Companion />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/vent"
+              element={
+                <ProtectedRoute>
+                  <Vent />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/groups"
+              element={
+                <ProtectedRoute>
+                  <Groups />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/gratitude"
+              element={
+                <ProtectedRoute>
+                  <Gratitude />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/library"
+              element={
+                <ProtectedRoute>
+                  <Library />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/peer-match"
+              element={
+                <ProtectedRoute>
+                  <PeerMatch />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <Reports />
                 </ProtectedRoute>
               }
             />
