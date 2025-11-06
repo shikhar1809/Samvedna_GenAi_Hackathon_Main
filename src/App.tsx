@@ -9,6 +9,7 @@ import Login from './pages/Login'
 import Signup from './pages/Signup'
 import Dashboard from './pages/Dashboard'
 import Onboarding from './pages/Onboarding'
+import Journal from './pages/Journal'
 
 const queryClient = new QueryClient()
 
@@ -34,6 +35,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/journal"
+              element={
+                <ProtectedRoute>
+                  <Journal />
                 </ProtectedRoute>
               }
             />
