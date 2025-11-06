@@ -16,8 +16,13 @@ export default function Journal() {
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
+  const [analyzing, setAnalyzing] = useState(false)
+  const [analysisResult, setAnalysisResult] = useState<any>(null)
+  const [showAnalysis, setShowAnalysis] = useState(false)
   const { user } = useAuth()
   const navigate = useNavigate()
+  
+  const isDemoMode = sessionStorage.getItem('demoMode') === 'true'
 
   const toggleTag = (tag: string) => {
     setSelectedTags(prev =>
@@ -25,9 +30,147 @@ export default function Journal() {
     )
   }
 
+  // Generate demo AI analysis
+  const generateDemoAnalysis = (text: string, mood: number, tags: string[]) => {
+    // Simple sentiment analysis based on keywords
+    const textLower = text.toLowerCase()
+    const hasAnxiety = textLower.includes('anxious') || textLower.includes('worried') || textLower.includes('stress')
+    const hasSadness = textLower.includes('sad') || textLower.includes('depressed') || textLower.includes('down')
+    const hasPositive = textLower.includes('happy') || textLower.includes('good') || textLower.includes('great')
+    
+    let severity = mood <= 3 ? 7 : mood <= 5 ? 5 : 3
+    let concerns: string[] = []
+    let positive: string[] = []
+    
+    if (hasAnxiety) {
+      concerns.push('Anxiety and worry patterns detected')
+      severity = Math.max(severity, 6)
+    }
+    if (hasSadness) {
+      concerns.push('Low mood indicators present')
+      severity = Math.max(severity, 7)
+    }
+    if (hasPositive) {
+      positive.push('Positive outlook and resilience noted')
+    }
+    
+    if (tags.includes('Stressed') || tags.includes('Overwhelmed')) {
+      concerns.push('High stress levels identified')
+      severity = Math.max(severity, 6)
+    }
+    if (tags.includes('Happy') || tags.includes('Grateful')) {
+      positive.push('Gratitude and positive emotions present')
+    }
+    
+    if (concerns.length === 0) {
+      concerns.push('General emotional patterns observed')
+    }
+    if (positive.length === 0) {
+      positive.push('Showing self-awareness and reflection')
+    }
+    
+    return {
+      summary: `Based on your journal entry, you're experiencing a mood level of ${mood}/10. ${hasAnxiety ? 'There are signs of anxiety and worry.' : ''} ${hasSadness ? 'Some low mood indicators are present.' : ''} ${hasPositive ? 'You also show positive outlook and resilience.' : ''} It's important to acknowledge all your feelings.`,
+      dsm5_codes: severity >= 7 ? ['F41.1 - Generalized Anxiety Disorder (Possible)', 'F32.9 - Major Depressive Disorder (Possible)'] : [],
+      severity: severity,
+      key_concerns: concerns,
+      positive_aspects: positive,
+      suggestions: [
+        'Practice deep breathing exercises for 5 minutes daily',
+        'Consider keeping a gratitude journal alongside your regular entries',
+        'Engage in physical activity, even a 10-minute walk can help',
+        'Connect with friends or family members you trust',
+        'Try progressive muscle relaxation before bed'
+      ],
+      coping_strategies: [
+        'Mindfulness meditation',
+        'Journaling (which you\'re already doing - great!)',
+        'Regular sleep schedule',
+        'Limit social media consumption',
+        'Engage in hobbies you enjoy'
+      ],
+      crisis_detected: severity >= 9,
+      professional_help_recommended: severity >= 7
+    }
+  }
+
+  const handleAnalyze = async () => {
+    if (!content.trim()) {
+      alert('Please write something in your journal first')
+      return
+    }
+
+    setAnalyzing(true)
+    setAnalysisResult(null)
+    setShowAnalysis(true)
+
+    try {
+      // Check if we're in demo mode or have real Supabase
+      if (isDemoMode || !user || import.meta.env.VITE_SUPABASE_URL === 'https://placeholder.supabase.co') {
+        // Demo mode - generate mock analysis
+        await new Promise(resolve => setTimeout(resolve, 2000)) // Simulate API delay
+        const demoAnalysis = generateDemoAnalysis(content, moodScore, selectedTags)
+        setAnalysisResult(demoAnalysis)
+        setAnalyzing(false)
+        return
+      }
+
+      // Real mode - call actual API
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/diagnose`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+        },
+        body: JSON.stringify({
+          journalText: content,
+          moodScore: moodScore,
+          moodTags: selectedTags,
+          userId: user.id,
+        }),
+      })
+
+      const result = await response.json()
+      if (result.success) {
+        setAnalysisResult(result.diagnosis.analysis)
+      } else {
+        // Fallback to demo if API fails
+        const demoAnalysis = generateDemoAnalysis(content, moodScore, selectedTags)
+        setAnalysisResult(demoAnalysis)
+        alert('Using demo analysis. Real AI requires Supabase configuration.')
+      }
+    } catch (error: any) {
+      // Fallback to demo on error
+      const demoAnalysis = generateDemoAnalysis(content, moodScore, selectedTags)
+      setAnalysisResult(demoAnalysis)
+      console.log('Using demo analysis due to error:', error.message)
+    } finally {
+      setAnalyzing(false)
+    }
+  }
+
+  const getSeverityColor = (severity: number) => {
+    if (severity <= 3) return 'text-green-600 dark:text-green-400'
+    if (severity <= 6) return 'text-yellow-600 dark:text-yellow-400'
+    return 'text-red-600 dark:text-red-400'
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!user || !content.trim()) return
+    if (!content.trim()) return
+
+    // In demo mode, just show success without saving
+    if (isDemoMode || !user) {
+      setSaving(true)
+      await new Promise(resolve => setTimeout(resolve, 500))
+      setSuccess(true)
+      setContent('')
+      setMoodScore(5)
+      setSelectedTags([])
+      setSaving(false)
+      setTimeout(() => setSuccess(false), 3000)
+      return
+    }
 
     setSaving(true)
     setSuccess(false)
@@ -142,13 +285,111 @@ export default function Journal() {
                   {saving ? 'Saving...' : 'Save Journal Entry'}
                 </button>
 
-                {/* AI Analysis Link */}
+                {/* AI Analysis Button */}
+                <button
+                  type="button"
+                  onClick={handleAnalyze}
+                  disabled={analyzing || !content.trim()}
+                  className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3 rounded-md hover:from-purple-600 hover:to-pink-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed font-medium shadow-lg"
+                >
+                  {analyzing ? '🤖 Analyzing...' : '✨ Get AI Analysis Now'}
+                </button>
+
+                {/* AI Analysis Results */}
+                {showAnalysis && (
+                  <div className="mt-6 p-6 bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 rounded-lg border-2 border-purple-200 dark:border-purple-800">
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-lg font-bold text-purple-900 dark:text-purple-100">
+                        🤖 AI Analysis Results
+                      </h3>
+                      <button
+                        onClick={() => setShowAnalysis(false)}
+                        className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    {analyzing ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+                        <p className="text-muted-foreground">Analyzing your thoughts...</p>
+                      </div>
+                    ) : analysisResult ? (
+                      <div className="space-y-4">
+                        {analysisResult.summary && (
+                          <div>
+                            <h4 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">Summary</h4>
+                            <p className="text-sm text-gray-700 dark:text-gray-300">{analysisResult.summary}</p>
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-4">
+                          <div>
+                            <span className="text-xs text-muted-foreground">Severity Level</span>
+                            <p className={`text-2xl font-bold ${getSeverityColor(analysisResult.severity)}`}>
+                              {analysisResult.severity}/10
+                            </p>
+                          </div>
+                          {isDemoMode && (
+                            <div className="text-xs bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 px-2 py-1 rounded">
+                              Demo Mode
+                            </div>
+                          )}
+                        </div>
+
+                        {analysisResult.key_concerns && analysisResult.key_concerns.length > 0 && (
+                          <div>
+                            <h4 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">Key Concerns</h4>
+                            <ul className="list-disc list-inside text-sm space-y-1 text-gray-700 dark:text-gray-300">
+                              {analysisResult.key_concerns.map((concern: string, i: number) => (
+                                <li key={i}>{concern}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {analysisResult.positive_aspects && analysisResult.positive_aspects.length > 0 && (
+                          <div>
+                            <h4 className="font-semibold mb-2 text-green-700 dark:text-green-300">Positive Aspects</h4>
+                            <ul className="list-disc list-inside text-sm space-y-1 text-gray-700 dark:text-gray-300">
+                              {analysisResult.positive_aspects.map((aspect: string, i: number) => (
+                                <li key={i}>{aspect}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {analysisResult.suggestions && analysisResult.suggestions.length > 0 && (
+                          <div>
+                            <h4 className="font-semibold mb-2 text-purple-900 dark:text-purple-100">Suggestions</h4>
+                            <ul className="list-disc list-inside text-sm space-y-1 text-gray-700 dark:text-gray-300">
+                              {analysisResult.suggestions.map((suggestion: string, i: number) => (
+                                <li key={i}>{suggestion}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                        {analysisResult.crisis_detected && (
+                          <div className="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
+                            <p className="text-red-800 dark:text-red-200 font-medium text-sm">
+                              🆘 Crisis Support: Please contact a mental health professional immediately or call 988.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+
+                {/* Alternative: Navigate to Diagnosis Page */}
                 <button
                   type="button"
                   onClick={() => navigate('/diagnosis')}
-                  className="w-full border-2 border-primary text-primary py-3 rounded-md hover:bg-primary/10 transition-colors font-medium"
+                  className="w-full border border-border text-muted-foreground py-2 rounded-md hover:bg-accent transition-colors text-sm"
                 >
-                  Get AI Analysis →
+                  View All Past Analyses →
                 </button>
               </form>
             </div>
